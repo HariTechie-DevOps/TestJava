@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sign Up</title>
+<style>
+body{font-family:Arial;background:#f5f5f5}
+.container{width:360px;margin:40px auto;background:#fff;padding:25px;border-radius:6px;box-shadow:0 0 10px rgba(0,0,0,.1)}
+label{display:block;margin-top:12px;font-weight:600}
+input,select{width:100%;padding:8px;margin-top:6px;border:1px solid #ccc;border-radius:4px}
+.input-group{display:flex}
+select{width:35%;margin-right:6px}
+input.invalid,select.invalid{border-color:red}
+.error{color:red;font-size:12px;display:none}
+button{width:100%;padding:10px;margin-top:16px;background:#007bff;color:#fff;border:none;border-radius:4px}
+.signin{text-align:center;margin-top:12px}
+.signin a{color:#007bff;font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Sign Up</h2>
+
+<label>Name</label>
+<input id="name">
+<div class="error" id="nameError"></div>
+
+<label>Age</label>
+<input id="age" type="number">
+<div class="error" id="ageError"></div>
+
+<label>Gender</label>
+<select id="gender">
+<option value="">Select</option>
+<option>Male</option>
+<option>Female</option>
+</select>
+<div class="error" id="genderError"></div>
+
+<label>Mobile</label>
+<div class="input-group">
+<select id="code"><option value="+91">+91</option></select>
+<input id="mobile" maxlength="15">
+</div>
+<div class="error" id="mobileError"></div>
+
+<label>Password</label>
+<input id="password" type="password">
+<div class="error" id="passwordError"></div>
+
+<button onclick="signup()">Sign Up</button>
+
+<div class="signin">
+Already have an account?
+<a href="#" onclick="openSignin()">Sign In</a>
+</div>
+</div>
+
+<script>
+const API_BASE="http://localhost:8080";
+
+function clearErrors(){
+document.querySelectorAll(".error").forEach(e=>e.style.display="none");
+document.querySelectorAll("input,select").forEach(e=>e.classList.remove("invalid"));
+}
+
+function showError(id,msg){
+document.getElementById(id).classList.add("invalid");
+const e=document.getElementById(id+"Error");
+e.innerText=msg;e.style.display="block";
+}
+
+mobile.oninput=e=>e.target.value=e.target.value.replace(/\D/g,"");
+
+function signup(){
+clearErrors();
+let invalid=false;
+
+const name=name.value.trim();
+const age=age.value;
+const gender=gender.value;
+const mobileVal=mobile.value.trim();
+const password=password.value;
+
+if(!/^[A-Za-z ]{3,}$/.test(name)){showError("name","Min 3 letters");invalid=true;}
+if(age<18||age>100){showError("age","Age 18–100 only");invalid=true;}
+if(!gender){showError("gender","Select gender");invalid=true;}
+if(!/^\d{7,15}$/.test(mobileVal)){showError("mobile","Invalid mobile");invalid=true;}
+if(!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)){showError("password","Weak password");invalid=true;}
+
+if(invalid)return;
+
+fetch(`${API_BASE}/api/signup`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name,age,gender,mobile:code.value+mobileVal,password})
+})
+.then(()=>window.location.href="signin.html");
+}
+
+function openSignin(){
+fetch(`${API_BASE}/api/signin/init`,{method:"GET"})
+.finally(()=>window.location.href="signin.html");
+}
+</script>
+</body>
+</html>
